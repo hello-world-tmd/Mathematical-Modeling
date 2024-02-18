@@ -1,29 +1,50 @@
 # 线性规划(Linear Programming, LP)
 
-## 1.线性规划模型的形式
+## 0. 问题案例
 
-一般形式：
-$$
-max(或min)z = c_1x_1 + c_2x_2 + ... + c_nx_n
-\\
-s.t.\begin{cases}
-a_{11}x_1+a_{12}x_2+...+a_{1n}x_n \le(或=,\ge) b_1 \\
-a_{21}x_1+a_{22}x_2+...+a_{2n}x_n \le(或=,\ge) b_2 \\
-\qquad . \\
-\qquad . \\
-\qquad . \\
-a_{m1}x_1+a_{m2}x_2+...+a_{mn}x_n \le(或=,\ge) b_m \\
-x_1, x_2, ..., x_n \ge 0
-\end{cases}
-\\
-$$
-简写：
-$$
-max(或min)z = \sum_{j=1}^{n}{c_jx_j}
-\\
-s.t.\begin{cases}
-\sum_{j=1}^{n}{a_{ij}x_j} \le(或=,\ge) b_i , \quad i=1,2,...m\\
-x_j \ge 0, \quad j=1,2,...n
-\end{cases}
-\\
-$$
+<img src="./image/LP-ex.png" style="zoom:50%;" />
+
+## 1. MATLAB基于求解器的求解方法
+
+<img src="./image/LP求解器标准形式.png" style="zoom: 33%;" />
+
+```matlab
+clc, clear
+c = [4;3]; b = [10;8;7];
+a = [2,1;1,1;0,1]; lb = zeros(2,1); %lb=[0;0]
+[x,fval] = linprog(-c,a,b,[],[],lb) %没有等号约束
+%此处求最大值，标准形式为求解最小值，所以此处加上负号
+y = -fval  %目标函数为最大化
+```
+
+## 2. MATLAB基于问题的求解方法
+
+```matlab
+clc, clear
+prob = optimproblem('ObjectiveSense', 'max')
+c = [4;3]; b = [10;8;7];
+a = [2,1;1,1;0,1]; lb = zeros(2,1);
+x = optimvar('x',2,'LowerBound',0);
+prob.Objective = c'*x;
+prob.Constraints.con = a*x<=b;
+[sol, fval, flage, out] = solve(prob)
+sol.x  %显示决策变量的值
+```
+
+
+
+易懂写法：
+
+<img src="./image/LP-ex2.png" style="zoom:50%;" />
+
+```matlab
+clc, clear
+prob = optimproblem('ObjectiveSense','max');
+x = optimvar('x',3,'LowerBound',0);
+prob.Objective = 2*x(1) + 3*x(2)-5*x(3);
+prob.Constraints.con1 = x(1)+x(2)+x(3) == 7;
+prob.Constraints.con2 = 2*x(1)-5*x(2)+x(3) >=10;
+prob.Constraints.con3 = x(1)+3*x(2)+x(3) <=12;
+[sol,fval,flag,out]= solve(prob), sol.x
+```
+
